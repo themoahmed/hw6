@@ -1,13 +1,25 @@
 #ifndef RECCHECK
+
 #include <iostream>
+
 #include <vector>
+
 #include <string>
+
 #include <set>
+
 #include <random>
+
 #include <iomanip>
+
 #include <fstream>
+
 #include <exception>
+
 #endif
+
+
+
 
 #include "boggle.h"
 
@@ -92,8 +104,41 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 }
 
 bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, const std::vector<std::vector<char> >& board, 
-								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
+                  std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
-//add your solution here!
+    // Boundary check to ensure we are within the grid
+    bool isWithinBounds = r < board.size() && c < board[0].size();
+	if (!isWithinBounds) {
+		std::string currentWord = word;
+		auto foundInDict = dict.find(currentWord); 
+		if (foundInDict != dict.end()) {
+			result.insert(currentWord);
+			return 1; 
+		}
+		return 0; 
+	}
 
+
+    //Create the next word
+    std::string nextWord = word + board[r][c];
+
+    // Verify if the current word is a valid prefix
+    if (prefix.find(word) != prefix.end() && dict.find(word) == dict.end()) {
+        // Recursive search 
+        return boggleHelper(dict, prefix, board, nextWord, result, r + dr, c + dc, dr, dc);
+    }
+
+    // Check if the current word is in the dictionary
+    if (dict.find(word) != dict.end()) {
+        //longer word
+        bool extendedSuccessful = boggleHelper(dict, prefix, board, nextWord, result, r + dr, c + dc, dr, dc);
+        if (!extendedSuccessful) {
+            result.insert(word);
+            return true;
+        }
+        return extendedSuccessful;
+    }
+
+    // Continue recursion
+    return false;
 }
